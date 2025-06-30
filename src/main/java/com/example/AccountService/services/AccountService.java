@@ -4,6 +4,7 @@ import com.example.AccountService.dao.api.IAccountStorage;
 import com.example.AccountService.dao.entity.AccountEntity;
 import com.example.AccountService.models.Account;
 import com.example.AccountService.services.api.IAccountService;
+import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +21,14 @@ import java.util.UUID;
 @Service
 public class AccountService implements IAccountService {
 
+
     private final IAccountStorage accountStorage;
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
 
 
-    public AccountService(IAccountStorage accountStorage, ConversionService conversionService) {
+    public AccountService( IAccountStorage accountStorage, ConversionService conversionService) {
+
         this.accountStorage = accountStorage;
         this.conversionService = conversionService;
 
@@ -53,10 +56,10 @@ public class AccountService implements IAccountService {
             accountRaw.setUuid(UUID.randomUUID());
             accountStorage.save(conversionService.convert(accountRaw, AccountEntity.class));
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         return accountRaw;
     }
@@ -65,8 +68,11 @@ public class AccountService implements IAccountService {
     @Override
     public PageImpl<Account> getAccounts(int page, int size) {
         // Проверка на положительность значений
-        if (page <= 0 || size <= 0) {
-            throw new ValidationException("Страница и размер должны быть больше 0");
+        if (page <= 0 ) {
+            throw new ValidationException(MessageError.PAGE_NUMBER);
+        }
+        if ( size <0) {
+            throw new ValidationException(MessageError.PAGE_SIZE);
         }
         int start;
         List<Account> accountList;
@@ -86,14 +92,14 @@ public class AccountService implements IAccountService {
             start = (int) pageable.getOffset();
             end = Math.min((start + pageable.getPageSize()), accountList.size());
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         // Проверка, что start не выходит за пределы списка
         if (start >= accountList.size()) {
-            throw new ValidationException("Количество аккаунтов меньше запроса");
+            throw new ValidationException(MessageError.RETRIEVE_ACCOUNTS);
         }
         return new PageImpl<>(accountList.subList(start, end), pageable, accountList.size());
     }
@@ -108,13 +114,13 @@ public class AccountService implements IAccountService {
             account = conversionService.convert(accountEntity, Account.class);
 
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         if (account == null) {
-            throw new ValidationException("Неверный uuid");
+            throw new ValidationException(MessageError.INCORRECT_UUID);
         }
         return account;
     }
@@ -139,11 +145,11 @@ public class AccountService implements IAccountService {
         check(accountRaw);
         //Проверка на наличие счета с этим uuid
         if (accountEntity == null) {
-            throw new ValidationException("Неверный uuid");
+            throw new ValidationException(MessageError.INCORRECT_UUID);
         }
         //Проверка на свежесть данных
         if (!(accountEntity.getDtUpdate().equals(dtUpdate))) {
-            throw new ValidationException("Устаревшие данные");
+            throw new ValidationException(MessageError.OUTDATED_DATA);
         }
 
         try {
@@ -155,10 +161,10 @@ public class AccountService implements IAccountService {
             accountEntity.setDtUpdate(localDateTime);
             accountStorage.save(accountEntity);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         return conversionService.convert(accountEntity, Account.class);
     }
@@ -183,11 +189,11 @@ public class AccountService implements IAccountService {
     public void check(Account accountRaw) {
         // Проверяем, что обязательные поля не null
         if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null) {
-            throw new ValidationException("Пустая строка");
+            throw new ValidationException(MessageError.EMPTY_LINE);
         }
         //Проверка свободен ли такой title
         if (accountStorage.existsByTitle(accountRaw.getTitle())) {
-            throw new ValidationException("Такой title уже существует ");
+            throw new ValidationException(MessageError.TITLE_TAKEN);
         }
     }
 

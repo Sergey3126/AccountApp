@@ -5,6 +5,7 @@ import com.example.AccountService.dao.api.IOperationStorage;
 import com.example.AccountService.dao.entity.OperationEntity;
 import com.example.AccountService.models.Operation;
 import com.example.AccountService.services.api.IOperationService;
+import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,10 +53,10 @@ public class OperationService implements IOperationService {
             accountService.updateBalace(operationRaw.getValue(), operationRaw.getAccountUuid());
             operationStorage.save(conversionService.convert(operationRaw, OperationEntity.class));
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         return operationRaw;
     }
@@ -63,10 +64,12 @@ public class OperationService implements IOperationService {
     @Override
     public PageImpl<Operation> getOperation(UUID accountUuid, int page, int size) {
         // Проверка на положительность значений
-        if (page <= 0 || size <= 0) {
-            throw new ValidationException("Страница и размер должны быть больше 0");
+        if (page <= 0 ) {
+            throw new ValidationException(MessageError.PAGE_NUMBER);
         }
-
+        if ( size <0) {
+            throw new ValidationException(MessageError.PAGE_SIZE);
+        }
         int start;
         List<Operation> operationList;
         int end;
@@ -86,14 +89,14 @@ public class OperationService implements IOperationService {
             end = Math.min((start + pageable.getPageSize()), operationList.size());
 
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         // Проверка, что start не выходит за пределы списка
         if (start >= operationList.size()) {
-            throw new ValidationException("Количество операций меньше запроса");
+            throw new ValidationException(MessageError.RETRIEVE_ACCOUNTS);
         }
         return new PageImpl<>(operationList.subList(start, end), pageable, operationList.size());
     }
@@ -142,10 +145,10 @@ public class OperationService implements IOperationService {
             accountService.updateBalace(num, accountUuid);
             operationStorage.save(operationEntity);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         return operationEntity;
     }
@@ -173,10 +176,10 @@ public class OperationService implements IOperationService {
             accountService.updateBalace(-operationEntity.getValue(), accountUuid);
             operationStorage.delete(operationEntity);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Запрос содержит некорретные данные. Измените запрос и отправьте его ещё раз ");
+            throw new ValidationException(MessageError.BAD_REQUEST);
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new ValidationException("Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ");
+            throw new ValidationException(MessageError.SERVER_ERROR);
         }
         return operationEntity;
     }
@@ -186,15 +189,15 @@ public class OperationService implements IOperationService {
     public void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid) {
         //Проверка на наличие операции с этим uuid
         if (operationEntity == null) {
-            throw new ValidationException("Неверный uuid");
+            throw new ValidationException(MessageError.INCORRECT_UUID);
         }
         //Проверка на свежесть данных
         if (!(operationEntity.getDtUpdate().equals(dtUpdate))) {
-            throw new ValidationException("Устаревшие данные");
+            throw new ValidationException(MessageError.OUTDATED_DATA);
         }
         //Проверяет, совпадает ли счет с операцией
         if (!operationEntity.getAccountUuid().equals(accountUuid)) {
-            throw new ValidationException("счет не соответствует операции");
+            throw new ValidationException(MessageError.INCORRECT_OPERATION);
         }
     }
 
@@ -202,11 +205,11 @@ public class OperationService implements IOperationService {
     public void check(Operation operationRaw, UUID accountUuid) {
         // Проверяем, что обязательные поля не null
         if ((operationRaw.getDescription() == null) || (operationRaw.getCurrency() == null) || (operationRaw.getDate() == null) || (operationRaw.getCategory() == null) || (operationRaw.getValue() == 0)) {
-            throw new ValidationException("Пустая строка");
+            throw new ValidationException(MessageError.EMPTY_LINE);
         }
         //Проверяет, совпадают ли типы валют
         if (!accountService.checkAccount(accountUuid, operationRaw.getCurrency())) {
-            throw new ValidationException("Currency счета и операции не совпадают ");
+            throw new ValidationException(MessageError.INCORRECT_CURRENCY);
         }
     }
 

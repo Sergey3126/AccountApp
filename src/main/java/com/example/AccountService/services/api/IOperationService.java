@@ -47,7 +47,7 @@ public interface IOperationService {
      * @param uuidOperation индификатор операции
      * @param dtUpdate      дата обновления
      * @return информацию об удаленном аккаунте
-     */
+     */ 
     OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate);
 
     /**
