@@ -64,10 +64,10 @@ public class OperationService implements IOperationService {
     @Override
     public PageImpl<Operation> getOperation(UUID accountUuid, int page, int size) {
         // Проверка на положительность значений
-        if (page <= 0 ) {
+        if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
         }
-        if ( size <0) {
+        if (size <= 0) {
             throw new ValidationException(MessageError.PAGE_SIZE);
         }
         int start;
@@ -105,7 +105,6 @@ public class OperationService implements IOperationService {
     @Override
     public OperationEntity updateOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, Operation operationRaw) {
         OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
-
 
 
         // // Проверяем, что обязательные поля не null
@@ -169,7 +168,7 @@ public class OperationService implements IOperationService {
         //     throw new ValidationException("счет не соответствует операции");
         // }
 
-        
+
         checkData(operationEntity, dtUpdate, accountUuid);
         try {
 //Обновляет баланс и удаляет операцию

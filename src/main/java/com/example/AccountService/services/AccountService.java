@@ -27,7 +27,7 @@ public class AccountService implements IAccountService {
     private LocalDateTime localDateTime = LocalDateTime.now();
 
 
-    public AccountService( IAccountStorage accountStorage, ConversionService conversionService) {
+    public AccountService(IAccountStorage accountStorage, ConversionService conversionService) {
 
         this.accountStorage = accountStorage;
         this.conversionService = conversionService;
@@ -68,10 +68,10 @@ public class AccountService implements IAccountService {
     @Override
     public PageImpl<Account> getAccounts(int page, int size) {
         // Проверка на положительность значений
-        if (page <= 0 ) {
+        if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
         }
-        if ( size <0) {
+        if (size <= 0) {
             throw new ValidationException(MessageError.PAGE_SIZE);
         }
         int start;
@@ -139,7 +139,6 @@ public class AccountService implements IAccountService {
         //  if (accountStorage.existsByTitle(accountRaw.getTitle())) {
         //      throw new ValidationException("Такой title уже существует ");
         //  }
-
 
 
         check(accountRaw);
