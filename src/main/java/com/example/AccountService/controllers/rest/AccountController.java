@@ -64,12 +64,12 @@ public class AccountController {
     }
 
     /**
-     * Обновляет информацию об аккаунте
+     * Обновляет информацию о счете
      *
      * @param uuid       Ключ счета
      * @param dtUpdate  последняя дата обновления счета
      * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
-     * @return обновленный аккаунт
+     * @return обновленный счет
      */
     @PutMapping(value = {"{uuid}/dt_update/{dt_update}", "{uuid}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

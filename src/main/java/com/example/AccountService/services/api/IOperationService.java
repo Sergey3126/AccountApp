@@ -34,7 +34,7 @@ public interface IOperationService {
      * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
      * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
-     * @return обновленный аккаунт
+     * @return обновленную операцию
      */
     OperationEntity updateOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, Operation operationRaw);
 
@@ -44,8 +44,8 @@ public interface IOperationService {
      * @param accountUuid   Ключ счета
      * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
-     * @return информацию об удаленном аккаунте
-     */ 
+     * @return информацию об удаленной операции
+     */
     OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate);
 
 }
