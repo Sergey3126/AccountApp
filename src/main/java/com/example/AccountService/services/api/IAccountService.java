@@ -9,62 +9,42 @@ import java.util.UUID;
 
 public interface IAccountService {
     /**
-     * создает счет
+     * Создает счет
      *
      * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
      * @return созданный счет
      */
-    Account create(Account accountRaw);
+    Account createAccount(Account accountRaw);
 
     /**
-     * дает список счетов по номеру страницы  и ее размеру
+     * Дает список счетов по номеру страницы и ее размеру
      *
-     * @param page номер страницы
-     * @param size кол-во обЪектов на странице(размер страницы)
+     * @param page номер страницы (больше 0)
+     * @param size кол-во объектов на странице(размер страницы, больше 0)
      * @return список счетов
      */
     PageImpl<Account> getAccounts(int page, int size);
 
     /**
-     * дает счет по uuid
+     * Дает счет по ключу
      *
-     * @param uuid индификатор счета
+     * @param uuid Ключ счета
      * @return полученный счет
      */
     Account getAccount(UUID uuid);
 
     /**
-     * обновляет информацию об аккаунте
+     * Обновляет информацию об счете
      *
-     * @param uuid       индификатор счета
+     * @param uuid       Ключ счета
      * @param dt_update  последняя дата обновления счета
      * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
-     * @return обновленный аккаунт
+     * @return обновленный счет
      */
     Account updateAccount(UUID uuid, LocalDateTime dt_update, Account accountRaw);
 
-    /**
-     * проверяет совпадают ли типы валют
-     *
-     * @param accountUuid индификатор счета
-     * @param currency    тип валют
-     * @return совпадает или нет
-     */
 
-    boolean checkAccount(UUID accountUuid, UUID currency);
 
-    /**
-     * Обновляет баланс
-     *
-     * @param value       значение на которое меняется баланс
-     * @param accountUuid индификатор счета
-     */
-    void updateBalace(int value, UUID accountUuid);
 
-    /**
-     * проверка ошибок: null и свободен ли title
-     *
-     * @param accountRaw Тело, которое передали в запросе
-     */
-    void check(Account accountRaw);
+
 }

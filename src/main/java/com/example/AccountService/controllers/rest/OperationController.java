@@ -17,7 +17,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/account")
 public class OperationController {
     private final IOperationService operationService;
 
@@ -26,35 +26,64 @@ public class OperationController {
         this.operationService = operationsService;
     }
 
-
-    @PostMapping(value = {"account/{accountUuid}/operation", "account/{accountUuid}/operation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Создает операцию для счета
+     *
+     * @param account_uuid  Ключ счета
+     * @param operationRaw тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
+     * @return созданную операцию
+     */
+    @PostMapping(value = {"{account_uuid}/operation", "{account_uuid}/operation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public Operation create(@PathVariable UUID accountUuid, @RequestBody Operation operation) {
-        return operationService.create(accountUuid, operation);
+    public Operation createOperation(@PathVariable UUID account_uuid, @RequestBody Operation operationRaw) {
+        return operationService.createOperation(account_uuid, operationRaw);
     }
 
-
-    @GetMapping(value = {"account/{accountUuid}/operation/{page}/{size}", "account/{accountUuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Дает операции счета
+     *
+     * @param account_uuid Ключ счета
+     * @param page        номер страницы
+     * @param size        кол-во объектов на странице(размер страницы)
+     * @return список операций
+     */
+    @GetMapping(value = {"{account_uuid}/operation/{page}/{size}", "{account_uuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public PageImpl<Operation> getOperation(@PathVariable UUID accountUuid, @PathVariable int page, @PathVariable int size) {
-        return operationService.getOperation(accountUuid, page, size);
+    public PageImpl<Operation> getOperation(@PathVariable UUID account_uuid, @PathVariable int page, @PathVariable int size) {
+        return operationService.getOperation(account_uuid, page, size);
     }
 
-
-    @PutMapping(value = {"account/{accountUuid}/operation/{uuidOperation}/dt_update/{dt_update}", "account/{accountUuid}/operation/{uuidOperation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Изменяет операцию
+     *
+     * @param account_uuid   Ключ счета
+     * @param uuid_operation Ключ операции
+     * @param dtUpdate      дата обновления
+     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
+     * @return обновленный счет
+     */
+    @PutMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public OperationEntity updateOperation(@PathVariable UUID accountUuid, @PathVariable UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate, @RequestBody Operation operation) {
-        return operationService.updateOperation(accountUuid, uuidOperation, dtUpdate, operation);
+    public OperationEntity updateOperation(@PathVariable UUID account_uuid, @PathVariable UUID uuid_operation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate, @RequestBody Operation operationRaw) {
+        return operationService.updateOperation(account_uuid, uuid_operation, dtUpdate, operationRaw);
     }
 
-    @DeleteMapping(value = {"account/{accountUuid}/operation/{uuidOperation}/dt_update/{dt_update}", "account/{accountUuid}/operation/{uuidOperation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Удаляет операцию
+     *
+     * @param account_uuid   Ключ счета
+     * @param uuid_operation Ключ операции
+     * @param dtUpdate      дата обновления
+     * @return информацию об удаленном счете
+     */
+    @DeleteMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public OperationEntity deleteOperation(@PathVariable UUID accountUuid, @PathVariable UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
-        return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate);
+    public OperationEntity deleteOperation(@PathVariable UUID account_uuid, @PathVariable UUID uuid_operation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
+        return operationService.deleteOperation(account_uuid, uuid_operation, dtUpdate);
     }
 }
 

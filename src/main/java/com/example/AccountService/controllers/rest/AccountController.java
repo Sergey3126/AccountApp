@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/account")
 public class AccountController {
     private final IAccountService accountService;
 
@@ -23,35 +23,59 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-
-    @PostMapping(value = {"account", "account/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Создает счет
+     *
+     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
+     * @return созданный счет
+     */
+    @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public Account createAccount(@RequestBody Account account) {
-        return accountService.create(account);
+    public Account createAccount(@RequestBody Account accountRaw) {
+        return accountService.createAccount(accountRaw);
     }
 
-
-    @GetMapping(value = {"account/{page}/{size}", "account/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Дает список счетов по номеру страницы и ее размеру
+     *
+     * @param page номер страницы
+     * @param size кол-во объектов на странице(размер страницы)
+     * @return список счетов
+     */
+    @GetMapping(value = {"{page}/{size}", "{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public PageImpl<Account> getAccounts(@PathVariable int page, @PathVariable int size) {
         return accountService.getAccounts(page, size);
     }
 
-
-    @GetMapping(value = {"account/{uuid}", "account/{uuid}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Дает счет по uuid
+     *
+     * @param uuid Ключ счета
+     * @return полученный счет
+     */
+    @GetMapping(value = {"{uuid}", "{uuid}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public Account getAccount(@PathVariable UUID uuid) {
         return accountService.getAccount(uuid);
     }
 
-    @PutMapping(value = {"account/{uuid}/dt_update/{dt_update}", "account/{uuid}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Обновляет информацию об аккаунте
+     *
+     * @param uuid       Ключ счета
+     * @param dtUpdate  последняя дата обновления счета
+     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
+     * @return обновленный аккаунт
+     */
+    @PutMapping(value = {"{uuid}/dt_update/{dt_update}", "{uuid}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public Account updateAccount(@PathVariable UUID uuid, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate, @RequestBody Account account) {
-        return accountService.updateAccount(uuid, dtUpdate, account);
+    public Account updateAccount(@PathVariable UUID uuid, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate, @RequestBody Account accountRaw) {
+        return accountService.updateAccount(uuid, dtUpdate, accountRaw);
     }
 
 

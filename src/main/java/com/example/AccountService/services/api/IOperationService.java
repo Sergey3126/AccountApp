@@ -1,8 +1,6 @@
 package com.example.AccountService.services.api;
 
-import com.example.AccountService.dao.entity.AccountEntity;
 import com.example.AccountService.dao.entity.OperationEntity;
-import com.example.AccountService.models.Account;
 import com.example.AccountService.models.Operation;
 import org.springframework.data.domain.PageImpl;
 
@@ -11,29 +9,29 @@ import java.util.UUID;
 
 public interface IOperationService {
     /**
-     * создает операцию для счета
+     * Cоздает операцию счета
      *
-     * @param accountUuid  индификатор счета
+     * @param accountUuid  Ключ счета
      * @param operationRaw тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
-     * @return созданую операцию
+     * @return созданную операцию
      */
-    Operation create(UUID accountUuid, Operation operationRaw);
+    Operation createOperation(UUID accountUuid, Operation operationRaw);
 
     /**
-     * дает операции аккауна
+     * Дает операции счета
      *
-     * @param accountUuid индификатор счета
-     * @param page        номер страницы
-     * @param size        кол-во обЪектов на странице(размер страницы)
+     * @param accountUuid Ключ счета
+     * @param page        номер страницы(больше 0)
+     * @param size        кол-во объектов на странице(размер страницы, больше 0)
      * @return список операций
      */
     PageImpl<Operation> getOperation(UUID accountUuid, int page, int size);
 
     /**
-     * изменяет операцию
+     * Изменяет операцию
      *
-     * @param accountUuid   индификатор счета
-     * @param uuidOperation индификатор операции
+     * @param accountUuid   Ключ счета
+     * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
      * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
      * @return обновленный аккаунт
@@ -41,29 +39,13 @@ public interface IOperationService {
     OperationEntity updateOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, Operation operationRaw);
 
     /**
-     * удаляет операцию
+     * Удаляет операцию
      *
-     * @param accountUuid   индификатор счета
-     * @param uuidOperation индификатор операции
+     * @param accountUuid   Ключ счета
+     * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
      * @return информацию об удаленном аккаунте
      */ 
     OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate);
 
-    /**
-     * проверка ошибок: свежесть данных, наличие операции и правильность счета
-     *
-     * @param operationEntity обЪект БД
-     * @param dtUpdate        дфта последнего обновления operationEntity
-     * @param accountUuid     индификатор счета
-     */
-    void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid);
-
-    /**
-     * проверка ошибок: null и совпадение валют
-     *
-     * @param operationRaw Тело, которое передали в запросе
-     * @param accountUuid  индификатор счета
-     */
-    void check(Operation operationRaw, UUID accountUuid);
 }

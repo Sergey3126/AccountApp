@@ -36,17 +36,7 @@ public class AccountService implements IAccountService {
 
 
     @Override
-    public Account create(Account accountRaw) {
-
-        //   // Проверяем, что обязательные поля не null
-        //    if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null) {
-        //        throw new ValidationException("Пустая строка");
-        //    }
-        //    // Проверка уникальности title
-        //    if (accountStorage.existsByTitle(accountRaw.getTitle())) {
-        //        throw new ValidationException("Такой title уже существует ");
-        //    }
-
+    public Account createAccount(Account accountRaw) {
 
         check(accountRaw);
         try {
@@ -67,7 +57,7 @@ public class AccountService implements IAccountService {
 
     @Override
     public PageImpl<Account> getAccounts(int page, int size) {
-        // Проверка на положительность значений
+        // Проверка на положительность значений(что больше 0)
         if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
         }
@@ -131,18 +121,9 @@ public class AccountService implements IAccountService {
 
         AccountEntity accountEntity;
         accountEntity = accountStorage.findById(uuid).orElse(null);
-        //  // Проверяем, что обязательные поля не null
-        //  if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null) {
-        //      throw new ValidationException("Пустая строка");
-        //  }
-        //  //Проверка свободен ли такой title
-        //  if (accountStorage.existsByTitle(accountRaw.getTitle())) {
-        //      throw new ValidationException("Такой title уже существует ");
-        //  }
-
 
         check(accountRaw);
-        //Проверка на наличие счета с этим uuid
+        //Проверка на наличие счета с этим ключом
         if (accountEntity == null) {
             throw new ValidationException(MessageError.INCORRECT_UUID);
         }
@@ -169,7 +150,7 @@ public class AccountService implements IAccountService {
     }
 
 
-    @Override
+
     public boolean checkAccount(UUID accountUuid, UUID currency) {
         if (accountStorage.findById(accountUuid).orElse(null).getCurrency().equals(currency)) {
             return true;
@@ -177,16 +158,16 @@ public class AccountService implements IAccountService {
         return false;
     }
 
-    @Override
-    public void updateBalace(int value, UUID accountUuid) {
+
+    public void updateBalance(int value, UUID accountUuid) {
         AccountEntity accountEntity = accountStorage.findById(accountUuid).orElse(null);
         accountEntity.setBalance(accountEntity.getBalance() + value);
         accountStorage.save(accountEntity);
     }
 
-    @Override
-    public void check(Account accountRaw) {
-        // Проверяем, что обязательные поля не null
+
+    private void check(Account accountRaw) {
+        // Проверяем, что обязательные поля не пусты
         if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null) {
             throw new ValidationException(MessageError.EMPTY_LINE);
         }

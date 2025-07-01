@@ -21,7 +21,7 @@ import java.util.UUID;
 @Service
 public class OperationService implements IOperationService {
 
-    private final AccountService accountService;
+ private final     AccountService accountService;
     private final IOperationStorage operationStorage;
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
@@ -29,20 +29,14 @@ public class OperationService implements IOperationService {
 
     public OperationService(AccountService accountService, IOperationStorage operationStorage, ConversionService conversionService) {
         this.accountService = accountService;
+
         this.operationStorage = operationStorage;
         this.conversionService = conversionService;
     }
 
     @Override
-    public Operation create(UUID accountUuid, Operation operationRaw) {
-        //  // Проверяем, что обязательные поля не null
-        //  if ((operationRaw.getDescription() == null) || (operationRaw.getCurrency() == null) || (operationRaw.getDate() == null) || (operationRaw.getCategory() == null) || (operationRaw.getValue() == 0)) {
-        //      throw new ValidationException("Пустая строка");
-        //  }
-        //  //Проверяет, совпадают ли типы валют
-        //  if (!accountService.check(accountUuid, operationRaw.getCurrency())) {
-        //      throw new ValidationException("Currency счета и операции не совпадают ");
-        //  }
+    public Operation createOperation(UUID accountUuid, Operation operationRaw) {
+
         check(operationRaw, accountUuid);
         try {
             //создает DtCreate, DtUpdate, Uuid, AccountUuid и обновляет баланс счета
@@ -50,7 +44,7 @@ public class OperationService implements IOperationService {
             operationRaw.setAccountUuid(accountUuid);
             operationRaw.setDtCreate(localDateTime);
             operationRaw.setDtUpdate(localDateTime);
-            accountService.updateBalace(operationRaw.getValue(), operationRaw.getAccountUuid());
+            accountService.updateBalance(operationRaw.getValue(), operationRaw.getAccountUuid());
             operationStorage.save(conversionService.convert(operationRaw, OperationEntity.class));
         } catch (DataIntegrityViolationException e) {
             throw new ValidationException(MessageError.BAD_REQUEST);
@@ -63,7 +57,7 @@ public class OperationService implements IOperationService {
 
     @Override
     public PageImpl<Operation> getOperation(UUID accountUuid, int page, int size) {
-        // Проверка на положительность значений
+        // Проверка на положительность значений(что больше 0 и не равен 0)
         if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
         }
@@ -107,26 +101,6 @@ public class OperationService implements IOperationService {
         OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
 
 
-        // // Проверяем, что обязательные поля не null
-        //  if ((operationRaw.getDescription() == null) || (operationRaw.getCurrency() == null) || (operationRaw.getDate() == null) || (operationRaw.getCategory() == null) || (operationRaw.getValue() == 0)) {
-        //      throw new ValidationException("Пустая строка");
-        //  }
-        // //Проверяет, совпадают ли типы валют
-        // if (!accountService.check(accountUuid, operationRaw.getCurrency())) {
-        //     throw new ValidationException("Currency счета и операции не совпадают ");
-        // }
-        // //Проверка на наличие операции с этим uuid
-        // if (operationEntity == null) {
-        //     throw new ValidationException("Неверный uuid");
-        // }
-        // //Проверка на свежесть данных
-        // if (!(operationEntity.getDtUpdate().equals(dtUpdate))) {
-        //     throw new ValidationException("Устаревшие данные");
-        // }
-        // //Проверяет, совпадает ли счет с операцией
-        // if (!operationEntity.getAccountUuid().equals(accountUuid)) {
-        //     throw new ValidationException("счет не соответствует операции");
-        // }
 
         check(operationRaw, accountUuid);
         checkData(operationEntity, dtUpdate, accountUuid);
@@ -141,7 +115,7 @@ public class OperationService implements IOperationService {
             operationEntity.setValue(operationRaw.getValue());
             operationEntity.setDtUpdate(localDateTime);
             operationEntity.setCurrency(operationRaw.getCurrency());
-            accountService.updateBalace(num, accountUuid);
+            accountService.updateBalance(num, accountUuid);
             operationStorage.save(operationEntity);
         } catch (DataIntegrityViolationException e) {
             throw new ValidationException(MessageError.BAD_REQUEST);
@@ -155,24 +129,10 @@ public class OperationService implements IOperationService {
     public OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate) {
         OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
 
-        // //Проверка на наличие операции с этим uuid
-        // if (operationEntity == null) {
-        //     throw new ValidationException("Неверный uuid");
-        // }
-        // //Проверка на свежесть данных
-        // if (!(operationEntity.getDtUpdate().equals(dtUpdate))) {
-        //     throw new ValidationException("Устаревшие данные");
-        // }
-        // //Проверяет, совпадает ли счет с операцией
-        // if (!operationEntity.getAccountUuid().equals(accountUuid)) {
-        //     throw new ValidationException("счет не соответствует операции");
-        // }
-
-
         checkData(operationEntity, dtUpdate, accountUuid);
         try {
 //Обновляет баланс и удаляет операцию
-            accountService.updateBalace(-operationEntity.getValue(), accountUuid);
+            accountService.updateBalance(-operationEntity.getValue(), accountUuid);
             operationStorage.delete(operationEntity);
         } catch (DataIntegrityViolationException e) {
             throw new ValidationException(MessageError.BAD_REQUEST);
@@ -184,9 +144,9 @@ public class OperationService implements IOperationService {
     }
 
 
-    @Override
-    public void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid) {
-        //Проверка на наличие операции с этим uuid
+
+    private void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid) {
+        //Проверка на наличие операции с этим ключом
         if (operationEntity == null) {
             throw new ValidationException(MessageError.INCORRECT_UUID);
         }
@@ -200,9 +160,9 @@ public class OperationService implements IOperationService {
         }
     }
 
-    @Override
-    public void check(Operation operationRaw, UUID accountUuid) {
-        // Проверяем, что обязательные поля не null
+
+    private void check(Operation operationRaw, UUID accountUuid) {
+        // Проверяем, что обязательные поля не пусты
         if ((operationRaw.getDescription() == null) || (operationRaw.getCurrency() == null) || (operationRaw.getDate() == null) || (operationRaw.getCategory() == null) || (operationRaw.getValue() == 0)) {
             throw new ValidationException(MessageError.EMPTY_LINE);
         }
@@ -213,3 +173,4 @@ public class OperationService implements IOperationService {
     }
 
 }
+
