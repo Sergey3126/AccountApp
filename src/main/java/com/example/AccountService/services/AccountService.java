@@ -12,6 +12,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +32,10 @@ public class AccountService implements IAccountService {
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
 
-
-    public AccountService(IAccountStorage accountStorage, ConversionService conversionService) {
+    public AccountService( IAccountStorage accountStorage, ConversionService conversionService) {
 
         this.accountStorage = accountStorage;
         this.conversionService = conversionService;
-
     }
 
 
@@ -177,6 +181,16 @@ public class AccountService implements IAccountService {
         }
     }
 
+    private boolean checkCurrencyByUUID(UUID uuid) throws IOException, InterruptedException {
 
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/v1/classifier/сurrency/"+uuid))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println(response.body());
+    return false;
+    }
 }
 
