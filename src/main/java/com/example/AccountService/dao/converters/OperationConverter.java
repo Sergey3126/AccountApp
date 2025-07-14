@@ -1,14 +1,11 @@
 package com.example.AccountService.dao.converters;
 
-import com.example.AccountService.dao.entity.AccountEntity;
+
 import com.example.AccountService.dao.entity.OperationEntity;
-import com.example.AccountService.models.Account;
+
 import com.example.AccountService.models.Operation;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class OperationConverter implements Converter<OperationEntity, Operation> {
 

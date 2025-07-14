@@ -3,35 +3,56 @@ package com.example.AccountService.services;
 import com.example.AccountService.dao.api.IOperationStorage;
 
 import com.example.AccountService.dao.entity.OperationEntity;
+
 import com.example.AccountService.models.Operation;
 import com.example.AccountService.services.api.IOperationService;
 import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
+import java.nio.charset.StandardCharsets;
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationService implements IOperationService {
 
- private final     AccountService accountService;
+    private final AccountService accountService;
     private final IOperationStorage operationStorage;
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
 
+    //ссылка для доступа к списку валют
+    @Value("${classifier_currency_url}")
+    private String currencyUrl;
+    //ссылка для доступа к списку категорий
+    @Value("${classifier_category_url}")
+    private String categoryUrl;
 
     public OperationService(AccountService accountService, IOperationStorage operationStorage, ConversionService conversionService) {
         this.accountService = accountService;
 
         this.operationStorage = operationStorage;
         this.conversionService = conversionService;
+
     }
 
     @Override
@@ -101,7 +122,6 @@ public class OperationService implements IOperationService {
         OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
 
 
-
         check(operationRaw, accountUuid);
         checkData(operationEntity, dtUpdate, accountUuid);
 
@@ -144,7 +164,6 @@ public class OperationService implements IOperationService {
     }
 
 
-
     private void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid) {
         //Проверка на наличие операции с этим ключом
         if (operationEntity == null) {
@@ -169,6 +188,40 @@ public class OperationService implements IOperationService {
         //Проверяет, совпадают ли типы валют
         if (!accountService.checkAccount(accountUuid, operationRaw.getCurrency())) {
             throw new ValidationException(MessageError.INCORRECT_CURRENCY);
+        }
+        checkCurrency(operationRaw);
+        checkOperationCategory(operationRaw);
+    }
+
+    //проверят доступен ли такой тип валюты
+    private void checkCurrency(Operation operationRaw) {
+        String uuid = String.valueOf(operationRaw.getCurrency());
+
+        try (InputStream stream = new URL(currencyUrl + uuid).openStream()) {
+            //получает текст
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            String currecy = reader.lines().collect(Collectors.joining("\n"));
+
+        } catch (IOException e) {
+
+            throw new ValidationException(MessageError.UUID_CURRENCY);
+
+        }
+    }
+
+    //проверят доступен ли такой тип операции
+    private void checkOperationCategory(Operation operationRaw) {
+        String uuid = String.valueOf(operationRaw.getCategory());
+
+        try (InputStream stream = new URL(categoryUrl + uuid).openStream()) {
+            //получает текст
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            String category = reader.lines().collect(Collectors.joining("\n"));
+
+        } catch (IOException e) {
+
+            throw new ValidationException(MessageError.UUID_OPERATION);
+
         }
     }
 

@@ -3,7 +3,6 @@ package com.example.AccountService.dao.converters;
 import com.example.AccountService.dao.entity.OperationEntity;
 import com.example.AccountService.models.Operation;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
 
 public class OperationConverterEntity implements Converter<Operation, OperationEntity> {

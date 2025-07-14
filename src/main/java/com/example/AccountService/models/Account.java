@@ -2,7 +2,7 @@ package com.example.AccountService.models;
 
 import com.example.AccountService.models.api.TypeOfAccount;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 

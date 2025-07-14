@@ -4,7 +4,6 @@ import com.example.AccountService.dao.entity.AccountEntity;
 import com.example.AccountService.models.Account;
 import com.example.AccountService.models.api.TypeOfAccount;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
 
 public class AccountConverter implements Converter<AccountEntity, Account> {

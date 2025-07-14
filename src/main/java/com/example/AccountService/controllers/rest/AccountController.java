@@ -51,7 +51,7 @@ public class AccountController {
     }
 
     /**
-     * Дает счет по uuid
+     * Дает счет по ключу
      *
      * @param uuid Ключ счета
      * @return полученный счет
@@ -67,7 +67,7 @@ public class AccountController {
      * Обновляет информацию о счете
      *
      * @param uuid       Ключ счета
-     * @param dtUpdate  последняя дата обновления счета
+     * @param dtUpdate   последняя дата обновления счета
      * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
      * @return обновленный счет
      */

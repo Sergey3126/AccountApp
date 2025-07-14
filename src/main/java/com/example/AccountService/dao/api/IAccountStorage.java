@@ -9,7 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface IAccountStorage extends JpaRepository<AccountEntity, UUID> {
-
-
     boolean existsByTitle(String title);
 }

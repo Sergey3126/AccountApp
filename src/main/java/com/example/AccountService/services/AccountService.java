@@ -6,22 +6,34 @@ import com.example.AccountService.models.Account;
 import com.example.AccountService.services.api.IAccountService;
 import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
+import java.io.IOException;
+
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -32,11 +44,17 @@ public class AccountService implements IAccountService {
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
 
-    public AccountService( IAccountStorage accountStorage, ConversionService conversionService) {
+    public AccountService(IAccountStorage accountStorage, ConversionService conversionService) {
 
         this.accountStorage = accountStorage;
         this.conversionService = conversionService;
+
+
     }
+
+    //ссылка для доступа к списку валют
+    @Value("${classifier_currency_url}")
+    private String currencyUrl;
 
 
     @Override
@@ -153,20 +171,19 @@ public class AccountService implements IAccountService {
         return conversionService.convert(accountEntity, Account.class);
     }
 
+    //обновляет баланс счета
+    public void updateBalance(int value, UUID accountUuid) {
+        AccountEntity accountEntity = accountStorage.findById(accountUuid).orElse(null);
+        accountEntity.setBalance(accountEntity.getBalance() + value);
+        accountStorage.save(accountEntity);
+    }
 
-
+    //проверяет, совпадают ли валюты счета и операции
     public boolean checkAccount(UUID accountUuid, UUID currency) {
         if (accountStorage.findById(accountUuid).orElse(null).getCurrency().equals(currency)) {
             return true;
         }
         return false;
-    }
-
-
-    public void updateBalance(int value, UUID accountUuid) {
-        AccountEntity accountEntity = accountStorage.findById(accountUuid).orElse(null);
-        accountEntity.setBalance(accountEntity.getBalance() + value);
-        accountStorage.save(accountEntity);
     }
 
 
@@ -179,18 +196,26 @@ public class AccountService implements IAccountService {
         if (accountStorage.existsByTitle(accountRaw.getTitle())) {
             throw new ValidationException(MessageError.TITLE_TAKEN);
         }
+        checkCurrency(accountRaw);
     }
 
-    private boolean checkCurrencyByUUID(UUID uuid) throws IOException, InterruptedException {
+    //проверят доступен ли такой тип валюты
+    private void checkCurrency(Account accountRaw) {
+        String uuid = String.valueOf(accountRaw.getCurrency());
+        try (InputStream stream = new URL(currencyUrl + uuid).openStream()) {
+            //получает текст
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            String currecy = reader.lines().collect(Collectors.joining("\n"));
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/v1/classifier/сurrency/"+uuid))
-                .build();
+        } catch (IOException e) {
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
-    return false;
+            throw new ValidationException(MessageError.UUID_CURRENCY);
+
+        }
+
+
     }
+
+
 }
 

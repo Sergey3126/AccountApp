@@ -2,9 +2,9 @@ package com.example.AccountService.controllers.rest;
 
 
 import com.example.AccountService.dao.entity.OperationEntity;
-import com.example.AccountService.models.Account;
+
 import com.example.AccountService.models.Operation;
-import com.example.AccountService.services.api.IAccountService;
+
 import com.example.AccountService.services.api.IOperationService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,7 +29,7 @@ public class OperationController {
     /**
      * Создает операцию для счета
      *
-     * @param account_uuid  Ключ счета
+     * @param account_uuid Ключ счета
      * @param operationRaw тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
      * @return созданную операцию
      */
@@ -44,8 +44,8 @@ public class OperationController {
      * Дает операции счета
      *
      * @param account_uuid Ключ счета
-     * @param page        номер страницы
-     * @param size        кол-во объектов на странице(размер страницы)
+     * @param page         номер страницы
+     * @param size         кол-во объектов на странице(размер страницы)
      * @return список операций
      */
     @GetMapping(value = {"{account_uuid}/operation/{page}/{size}", "{account_uuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,8 +60,8 @@ public class OperationController {
      *
      * @param account_uuid   Ключ счета
      * @param uuid_operation Ключ операции
-     * @param dtUpdate      дата обновления
-     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
+     * @param dtUpdate       дата обновления
+     * @param operationRaw   тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
      * @return обновленный счет
      */
     @PutMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +76,7 @@ public class OperationController {
      *
      * @param account_uuid   Ключ счета
      * @param uuid_operation Ключ операции
-     * @param dtUpdate      дата обновления
+     * @param dtUpdate       дата обновления
      * @return информацию об удаленном счете
      */
     @DeleteMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)

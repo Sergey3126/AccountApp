@@ -44,7 +44,4 @@ public interface IAccountService {
     Account updateAccount(UUID uuid, LocalDateTime dt_update, Account accountRaw);
 
 
-
-
-
 }

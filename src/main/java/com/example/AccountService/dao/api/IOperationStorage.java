@@ -1,7 +1,6 @@
 package com.example.AccountService.dao.api;
 
 
-import com.example.AccountService.dao.entity.AccountEntity;
 import com.example.AccountService.dao.entity.OperationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
