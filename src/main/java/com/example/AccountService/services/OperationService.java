@@ -198,9 +198,9 @@ public class OperationService implements IOperationService {
         String uuid = String.valueOf(operationRaw.getCurrency());
 
         try (InputStream stream = new URL(currencyUrl + uuid).openStream()) {
-            //получает текст
+            //получает валюту
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            String currecy = reader.lines().collect(Collectors.joining("\n"));
+            String currency = reader.lines().collect(Collectors.joining("\n"));
 
         } catch (IOException e) {
 
@@ -214,7 +214,7 @@ public class OperationService implements IOperationService {
         String uuid = String.valueOf(operationRaw.getCategory());
 
         try (InputStream stream = new URL(categoryUrl + uuid).openStream()) {
-            //получает текст
+            //получает тип
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             String category = reader.lines().collect(Collectors.joining("\n"));
 
