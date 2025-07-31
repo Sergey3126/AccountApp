@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -44,8 +45,8 @@ public class OperationController {
      * Дает операции счета
      *
      * @param accountUuid Ключ счета
-     * @param page        номер страницы
-     * @param size        кол-во объектов на странице(размер страницы)
+     * @param page        номер страницы (больше 0)
+     * @param size        кол-во объектов на странице(размер страницы, больше 0)
      * @return список операций
      */
     @GetMapping(value = {"{account_uuid}/operation/{page}/{size}", "{account_uuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,6 +86,19 @@ public class OperationController {
     @ResponseStatus(HttpStatus.OK)
     public OperationEntity deleteOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable("uuid_operation") UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
         return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate);
+    }
+
+    /**
+     * Дает список операций счета
+     *
+     * @param accountUuid Ключ счета
+     * @return список операций
+     */
+    @GetMapping(value = {"{account_uuid}/operation", "{account_uuid}/operation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public List<Operation> getOperationList(@PathVariable("account_uuid") UUID accountUuid) {
+        return operationService.getOperationList(accountUuid);
     }
 }
 

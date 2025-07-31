@@ -39,8 +39,8 @@ public class AccountController {
     /**
      * Дает список счетов по номеру страницы и ее размеру
      *
-     * @param page номер страницы
-     * @param size кол-во объектов на странице(размер страницы)
+     * @param page номер страницы(больше 0)
+     * @param size кол-во объектов на странице(размер страницы больше 0)
      * @return список счетов
      */
     @GetMapping(value = {"{page}/{size}", "{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,8 +77,7 @@ public class AccountController {
     public Account updateAccount(@PathVariable UUID uuid, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate, @RequestBody Account accountRaw) {
         return accountService.updateAccount(uuid, dtUpdate, accountRaw);
     }
-
-
 }
+
 
 

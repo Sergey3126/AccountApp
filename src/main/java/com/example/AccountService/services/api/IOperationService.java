@@ -5,6 +5,7 @@ import com.example.AccountService.models.Operation;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface IOperationService {
@@ -48,4 +49,11 @@ public interface IOperationService {
      */
     OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate);
 
+    /**
+     * Дает список операций счета
+     *
+     * @param accountUuid Ключ счета
+     * @return список операций
+     */
+    List<Operation> getOperationList(UUID accountUuid);
 }

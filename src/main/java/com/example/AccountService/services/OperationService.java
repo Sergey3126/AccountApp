@@ -163,6 +163,29 @@ public class OperationService implements IOperationService {
         return operationEntity;
     }
 
+    @Override
+    public List<Operation> getOperationList(UUID accountUuid) {
+        int start;
+        List<Operation> operationList;
+        int end;
+        Pageable pageable;
+        try {
+            List<OperationEntity> operationEntityList = operationStorage.findByAccountUuid(accountUuid);
+            operationList = new ArrayList<>();
+            // Конвертация OperationEntity в Operation и добавление в список
+            for (int i = 0; i < operationEntityList.size(); i++) {
+                OperationEntity operationEntity = operationEntityList.get(i);
+                Operation operation = conversionService.convert(operationEntity, Operation.class);
+                operationList.add(operation);
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException(MessageError.BAD_REQUEST);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            throw new ValidationException(MessageError.SERVER_ERROR);
+        }
+        return operationList;
+    }
 
     private void checkData(OperationEntity operationEntity, LocalDateTime dtUpdate, UUID accountUuid) {
         //Проверка на наличие операции с этим ключом
@@ -189,38 +212,21 @@ public class OperationService implements IOperationService {
         if (!accountService.checkAccount(accountUuid, operationRaw.getCurrency())) {
             throw new ValidationException(MessageError.INCORRECT_CURRENCY);
         }
-        checkCurrency(operationRaw);
-        checkOperationCategory(operationRaw);
+        checkAccessibility(operationRaw, categoryUrl, String.valueOf(operationRaw.getCategory()));
+        checkAccessibility(operationRaw, currencyUrl, String.valueOf(operationRaw.getCurrency()));
     }
 
-    //проверят доступен ли такой тип валюты
-    private void checkCurrency(Operation operationRaw) {
-        String uuid = String.valueOf(operationRaw.getCurrency());
 
-        try (InputStream stream = new URL(currencyUrl + uuid).openStream()) {
-            //получает валюту
+    //проверят доступность категории или валюты
+    private void checkAccessibility(Operation operationRaw, String url, String uuid) {
+
+
+        try (InputStream stream = new URL(url + uuid).openStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            String currency = reader.lines().collect(Collectors.joining("\n"));
-
+            String str = reader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
 
-            throw new ValidationException(MessageError.UUID_CURRENCY);
-
-        }
-    }
-
-    //проверят доступен ли такой тип операции
-    private void checkOperationCategory(Operation operationRaw) {
-        String uuid = String.valueOf(operationRaw.getCategory());
-
-        try (InputStream stream = new URL(categoryUrl + uuid).openStream()) {
-            //получает тип
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            String category = reader.lines().collect(Collectors.joining("\n"));
-
-        } catch (IOException e) {
-
-            throw new ValidationException(MessageError.UUID_OPERATION);
+            throw new ValidationException(MessageError.INCORRECT_UUID);
 
         }
     }

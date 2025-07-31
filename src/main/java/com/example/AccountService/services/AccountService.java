@@ -11,28 +11,25 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
 
-import java.net.URISyntaxException;
+
 import java.net.URL;
-import java.net.URLConnection;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -171,6 +168,7 @@ public class AccountService implements IAccountService {
         }
         return conversionService.convert(accountEntity, Account.class);
     }
+
 
     //обновляет баланс счета
     public void updateBalance(int value, UUID accountUuid) {
