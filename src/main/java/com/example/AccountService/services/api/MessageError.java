@@ -29,5 +29,4 @@ public final class MessageError {
 
     public static final String UUID_CURRENCY = "Переданная Currency отсутствует в списке доступных";
 
-    public static final String UUID_OPERATION = "Переданная Category отсутствует в списке доступных";
 }
