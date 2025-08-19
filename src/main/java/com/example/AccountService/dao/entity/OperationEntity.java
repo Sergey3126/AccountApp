@@ -15,13 +15,37 @@ public class OperationEntity {
     private UUID uuid;
     private UUID accountUuid;
     private LocalDateTime dtCreate;
-
     private LocalDateTime dtUpdate;
     private LocalDateTime date;
     private String description;
     private int value;
     private UUID currency;
     private UUID category;
+    private String nick;
+
+    @Override
+    public String toString() {
+        return "OperationEntity{" +
+                "uuid=" + uuid +
+                ", accountUuid=" + accountUuid +
+                ", dtCreate=" + dtCreate +
+                ", dtUpdate=" + dtUpdate +
+                ", date=" + date +
+                ", description='" + description + '\'' +
+                ", value=" + value +
+                ", currency=" + currency +
+                ", category=" + category +
+                ", nick='" + nick + '\'' +
+                '}';
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
 
     public UUID getUuid() {
         return uuid;
@@ -98,30 +122,16 @@ public class OperationEntity {
     public OperationEntity() {
     }
 
-    public OperationEntity(LocalDateTime dtCreate, UUID uuid, UUID accountUuid, LocalDateTime dtUpdate, LocalDateTime date, String description, int value, UUID currency, UUID category) {
-        this.dtCreate = dtCreate;
+    public OperationEntity(UUID uuid, UUID accountUuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, LocalDateTime date, String description, int value, UUID currency, UUID category, String nick) {
         this.uuid = uuid;
         this.accountUuid = accountUuid;
+        this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
         this.date = date;
         this.description = description;
         this.value = value;
         this.currency = currency;
         this.category = category;
-    }
-
-    @Override
-    public String toString() {
-        return "OperationEntity{" +
-                "uuid=" + uuid +
-                ", accountUuid=" + accountUuid +
-                ", dtCreate=" + dtCreate +
-                ", dtUpdate=" + dtUpdate +
-                ", date=" + date +
-                ", description='" + description + '\'' +
-                ", value=" + value +
-                ", currency='" + currency + '\'' +
-                ", category='" + category + '\'' +
-                '}';
+        this.nick = nick;
     }
 }

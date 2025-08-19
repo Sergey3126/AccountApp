@@ -12,10 +12,9 @@ public class OperationConverter implements Converter<OperationEntity, Operation>
 
     @Override
     public Operation convert(OperationEntity source) {
-
-
         Operation operation = new Operation();
 
+        operation.setNick(source.getNick());
         operation.setUuid(source.getUuid());
         operation.setDtCreate(source.getDtCreate());
         operation.setDtUpdate(source.getDtUpdate());

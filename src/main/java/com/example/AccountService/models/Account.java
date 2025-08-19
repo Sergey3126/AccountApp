@@ -15,19 +15,55 @@ public class Account {
     private int balance;
     private TypeOfAccount type;
     private UUID currency;
+    private String nick;
+    private String key;
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "uuid=" + uuid +
+                ", dtCreate=" + dtCreate +
+                ", dtUpdate=" + dtUpdate +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", balance=" + balance +
+                ", type=" + type +
+                ", currency=" + currency +
+                ", nick='" + nick + '\'' +
+                ", key='" + key + '\'' +
+                '}';
+    }
 
     public Account() {
     }
 
-    public Account(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String title, String description, UUID currency, int balance, TypeOfAccount type) {
+    public Account(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String title, String description, TypeOfAccount type, int balance, UUID currency, String nick, String key) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
         this.title = title;
         this.description = description;
-        this.currency = currency;
-        this.balance = balance;
         this.type = type;
+        this.balance = balance;
+        this.currency = currency;
+        this.nick = nick;
+        this.key = key;
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public UUID getUuid() {
@@ -94,17 +130,4 @@ public class Account {
         this.currency = currency;
     }
 
-    @Override
-    public String toString() {
-        return "Account{" +
-                "uuid=" + uuid +
-                ", dtCreate=" + dtCreate +
-                ", dtUpdate=" + dtUpdate +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", balance=" + balance +
-                ", type='" + type + '\'' +
-                ", currency='" + currency + '\'' +
-                '}';
-    }
 }

@@ -17,3 +17,4 @@ spring:
 
 classifier_currency_url: http://localhost:8081/api/v1/classifier/currency/
 classifier_category_url: http://localhost:8081/api/v1/classifier/operation/category/
+encryption_url: http://localhost:8084/api/v1/encryption/

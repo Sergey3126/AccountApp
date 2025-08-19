@@ -3,15 +3,22 @@ package com.example.AccountService.services;
 import com.example.AccountService.dao.api.IAccountStorage;
 import com.example.AccountService.dao.entity.AccountEntity;
 import com.example.AccountService.models.Account;
+import com.example.AccountService.models.User;
 import com.example.AccountService.services.api.IAccountService;
 import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 
 import java.io.IOException;
@@ -41,14 +48,17 @@ public class AccountService implements IAccountService {
     private final IAccountStorage accountStorage;
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private RestTemplate restTemplate = new RestTemplate();
 
     public AccountService(IAccountStorage accountStorage, ConversionService conversionService) {
-
         this.accountStorage = accountStorage;
         this.conversionService = conversionService;
-
-
     }
+
+    //ссылка для доступа к шифровке
+    @Value("${encryption_url}")
+    private String encryptionUrl;
 
     //ссылка для доступа к списку валют
     @Value("${classifier_currency_url}")
@@ -59,6 +69,11 @@ public class AccountService implements IAccountService {
     public Account createAccount(Account accountRaw) {
 
         check(accountRaw);
+        User user = new User();
+        user.setKey(accountRaw.getKey());
+        user.setNick(accountRaw.getNick());
+        checkKey(user);
+        accountRaw.setKey(null);
         try {
             //создает DtCreate, DtUpdate, Uuid
             accountRaw.setDtCreate(localDateTime);
@@ -76,7 +91,7 @@ public class AccountService implements IAccountService {
 
 
     @Override
-    public PageImpl<Account> getAccounts(int page, int size) {
+    public PageImpl<Account> getAccounts(int page, int size, User user) {
         // Проверка на положительность значений(что больше 0)
         if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
@@ -84,12 +99,13 @@ public class AccountService implements IAccountService {
         if (size <= 0) {
             throw new ValidationException(MessageError.PAGE_SIZE);
         }
+        checkKey(user);
         int start;
         List<Account> accountList;
         int end;
         Pageable pageable;
         try {
-            List<AccountEntity> accountEntityList = accountStorage.findAll();
+            List<AccountEntity> accountEntityList = accountStorage.findByNick(user.getNick());
             accountList = new ArrayList<>();
             pageable = Pageable.ofSize(size).withPage(page - 1);
             // Конвертация AccountEntity в Account и добавление в список
@@ -116,11 +132,18 @@ public class AccountService implements IAccountService {
 
 
     @Override
-    public Account getAccount(UUID uuid) {
+    public Account getAccount(UUID uuid, User user) {
         Account account;
-        AccountEntity accountEntity;
+        AccountEntity accountEntity = new AccountEntity();
+        checkKey(user);
         try {
-            accountEntity = accountStorage.findById(uuid).orElse(null);
+            List<AccountEntity> accountEntityList = accountStorage.findByNick(user.getNick());
+            for (int i = 0; i < accountEntityList.size(); i++) {
+                accountEntity = accountEntityList.get(i);
+                if (accountEntity.getUuid() == uuid) {
+                    break;
+                }
+            }
             account = conversionService.convert(accountEntity, Account.class);
 
         } catch (DataIntegrityViolationException e) {
@@ -139,10 +162,22 @@ public class AccountService implements IAccountService {
     @Override
     public Account updateAccount(UUID uuid, LocalDateTime dtUpdate, Account accountRaw) {
 
-        AccountEntity accountEntity;
-        accountEntity = accountStorage.findById(uuid).orElse(null);
+        AccountEntity accountEntity = new AccountEntity();
+        User user = new User();
+        user.setKey(accountRaw.getKey());
+        user.setNick(accountRaw.getNick());
 
+        checkKey(user);
         check(accountRaw);
+
+        List<AccountEntity> accountEntityList = accountStorage.findByNick(user.getNick());
+        for (int i = 0; i < accountEntityList.size(); i++) {
+            accountEntity = accountEntityList.get(i);
+            if (accountEntity.getUuid() == uuid) {
+                break;
+            }
+        }
+
         //Проверка на наличие счета с этим ключом
         if (accountEntity == null) {
             throw new ValidationException(MessageError.INCORRECT_UUID);
@@ -188,7 +223,7 @@ public class AccountService implements IAccountService {
 
     private void check(Account accountRaw) {
         // Проверяем, что обязательные поля не пусты
-        if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null) {
+        if (accountRaw.getType() == null || accountRaw.getTitle() == null || accountRaw.getDescription() == null || accountRaw.getCurrency() == null || accountRaw.getNick() == null || accountRaw.getKey() == null) {
             throw new ValidationException(MessageError.EMPTY_LINE);
         }
         //Проверка свободен ли такой title
@@ -211,10 +246,29 @@ public class AccountService implements IAccountService {
             throw new ValidationException(MessageError.UUID_CURRENCY);
 
         }
-
-
     }
 
+    //проверка авторизации
+    private void checkKey(User user) {
+        // Проверяем, что обязательные поля не пусты
+        if (user.getNick() == null || user.getKey() == null) {
+            throw new ValidationException(MessageError.EMPTY_LINE);
+        }
+        try {
+            //получаем совпадает ли токен
+            String jsonUser = objectMapper.writeValueAsString(user);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> str = new HttpEntity<>(jsonUser, headers);
+            ResponseEntity<Boolean> response = restTemplate.postForEntity(encryptionUrl + "check", str, boolean.class);
+            boolean bool = response.getBody();
 
+            if (!bool) {
+                throw new ValidationException(MessageError.INCORRECT_TOKEN);
+            }
+        } catch (IOException e) {
+            throw new ValidationException(MessageError.INCORRECT_UUID);
+        }
+    }
 }
 

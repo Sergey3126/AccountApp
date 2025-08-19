@@ -5,6 +5,7 @@ import com.example.AccountService.dao.entity.OperationEntity;
 
 import com.example.AccountService.models.Operation;
 
+import com.example.AccountService.models.User;
 import com.example.AccountService.services.api.IOperationService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,7 +29,7 @@ public class OperationController {
     }
 
     /**
-     * Создает операцию для счета
+     * Cоздает операцию счета
      *
      * @param accountUuid  Ключ счета
      * @param operationRaw тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
@@ -45,15 +46,16 @@ public class OperationController {
      * Дает операции счета
      *
      * @param accountUuid Ключ счета
-     * @param page        номер страницы (больше 0)
+     * @param page        номер страницы(больше 0)
      * @param size        кол-во объектов на странице(размер страницы, больше 0)
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @return список операций
      */
     @GetMapping(value = {"{account_uuid}/operation/{page}/{size}", "{account_uuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public PageImpl<Operation> getOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable int page, @PathVariable int size) {
-        return operationService.getOperation(accountUuid, page, size);
+    public PageImpl<Operation> getOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable int page, @PathVariable int size,@RequestBody User user) {
+        return operationService.getOperation(accountUuid, page, size,user);
     }
 
     /**
@@ -61,9 +63,9 @@ public class OperationController {
      *
      * @param accountUuid   Ключ счета
      * @param uuidOperation Ключ операции
-     * @param dtUpdate      дата последнего обновления
-     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
-     * @return обновленный счет
+     * @param dtUpdate      дата обновления
+     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат), nick(ник), key(токен)
+     * @return обновленную операцию
      */
     @PutMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -78,27 +80,28 @@ public class OperationController {
      *
      * @param accountUuid   Ключ счета
      * @param uuidOperation Ключ операции
-     * @param dtUpdate      дата последнего обновления
-     * @return информацию об удаленном счете
+     * @param dtUpdate      дата обновления
+     * @param user тело авторизации с nick(ник) и key(токен)
+     * @return информацию об удаленной операции
      */
     @DeleteMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public OperationEntity deleteOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable("uuid_operation") UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
-        return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate);
+    public OperationEntity deleteOperation(@RequestBody User user,@PathVariable("account_uuid") UUID accountUuid, @PathVariable("uuid_operation") UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
+        return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate,user);
     }
 
     /**
      * Дает список операций счета
-     *
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @param accountUuid Ключ счета
      * @return список операций
      */
     @GetMapping(value = {"{account_uuid}/operation", "{account_uuid}/operation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public List<Operation> getOperationList(@PathVariable("account_uuid") UUID accountUuid) {
-        return operationService.getOperationList(accountUuid);
+    public List<Operation> getOperationList(@RequestBody User user,@PathVariable("account_uuid") UUID accountUuid) {
+        return operationService.getOperationList(accountUuid,user);
     }
 }
 

@@ -15,6 +15,8 @@ public class Operation {
     private UUID accountUuid;
     private UUID currency;
     private UUID category;
+    private String nick;
+    private String key;
 
     public Operation() {
     }
@@ -91,16 +93,20 @@ public class Operation {
         this.category = category;
     }
 
-    public Operation(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, LocalDateTime date, String description, int value, UUID accountUuid, UUID currency, UUID category) {
-        this.uuid = uuid;
-        this.dtCreate = dtCreate;
-        this.dtUpdate = dtUpdate;
-        this.date = date;
-        this.description = description;
-        this.value = value;
-        this.accountUuid = accountUuid;
-        this.currency = currency;
-        this.category = category;
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
@@ -113,8 +119,25 @@ public class Operation {
                 ", description='" + description + '\'' +
                 ", value=" + value +
                 ", accountUuid=" + accountUuid +
-                ", currency='" + currency + '\'' +
-                ", category='" + category + '\'' +
+                ", currency=" + currency +
+                ", category=" + category +
+                ", nick='" + nick + '\'' +
+                ", key='" + key + '\'' +
                 '}';
     }
+
+    public Operation(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, LocalDateTime date, String description, int value, UUID accountUuid, UUID currency, UUID category, String nick, String key) {
+        this.uuid = uuid;
+        this.dtCreate = dtCreate;
+        this.dtUpdate = dtUpdate;
+        this.date = date;
+        this.description = description;
+        this.value = value;
+        this.accountUuid = accountUuid;
+        this.currency = currency;
+        this.category = category;
+        this.nick = nick;
+        this.key = key;
+    }
+
 }

@@ -2,6 +2,7 @@ package com.example.AccountService.controllers.rest;
 
 
 import com.example.AccountService.models.Account;
+import com.example.AccountService.models.User;
 import com.example.AccountService.services.api.IAccountService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,7 +27,7 @@ public class AccountController {
     /**
      * Создает счет
      *
-     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
+     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта), nick(ник), key(токен)
      * @return созданный счет
      */
     @PostMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,37 +39,37 @@ public class AccountController {
 
     /**
      * Дает список счетов по номеру страницы и ее размеру
-     *
-     * @param page номер страницы(больше 0)
-     * @param size кол-во объектов на странице(размер страницы больше 0)
+     * @param user тело авторизации с nick(ник) и key(токен)
+     * @param page номер страницы (больше 0)
+     * @param size кол-во объектов на странице(размер страницы, больше 0)
      * @return список счетов
      */
     @GetMapping(value = {"{page}/{size}", "{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public PageImpl<Account> getAccounts(@PathVariable int page, @PathVariable int size) {
-        return accountService.getAccounts(page, size);
+    public PageImpl<Account> getAccounts(@PathVariable int page, @PathVariable int size,@RequestBody User user) {
+        return accountService.getAccounts(page, size,user);
     }
 
     /**
      * Дает счет по ключу
-     *
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @param uuid Ключ счета
      * @return полученный счет
      */
     @GetMapping(value = {"{uuid}", "{uuid}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public Account getAccount(@PathVariable UUID uuid) {
-        return accountService.getAccount(uuid);
+    public Account getAccount(@PathVariable UUID uuid,@RequestBody User user) {
+        return accountService.getAccount(uuid,user);
     }
 
     /**
-     * Обновляет информацию о счете
+     * Обновляет информацию об счете
      *
      * @param uuid       Ключ счета
-     * @param dtUpdate   последняя дата обновления счета
-     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта)
+     * @param dtUpdate  последняя дата обновления счета
+     * @param accountRaw тело счета с title(название), description(описание), type(тип), currency(валюта), nick(ник), key(токен)
      * @return обновленный счет
      */
     @PutMapping(value = {"{uuid}/dt_update/{dt_update}", "{uuid}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)

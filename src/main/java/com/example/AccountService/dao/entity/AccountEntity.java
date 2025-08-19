@@ -20,20 +20,49 @@ public class AccountEntity {
     private int balance;
     private String type;
     private UUID currency;
+    private String nick;
+
 
     public AccountEntity() {
     }
 
-    public AccountEntity(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String title, String description, int balance, UUID currency, String type) {
+    @Override
+    public String toString() {
+        return "AccountEntity{" +
+                "uuid=" + uuid +
+                ", dtCreate=" + dtCreate +
+                ", dtUpdate=" + dtUpdate +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", balance=" + balance +
+                ", type='" + type + '\'' +
+                ", currency=" + currency +
+                ", nick='" + nick + '\'' +
+
+                '}';
+    }
+
+    public AccountEntity(UUID uuid, LocalDateTime dtCreate, LocalDateTime dtUpdate, String title, String description, int balance, String type, UUID currency, String nick) {
         this.uuid = uuid;
         this.dtCreate = dtCreate;
         this.dtUpdate = dtUpdate;
         this.title = title;
         this.description = description;
         this.balance = balance;
-        this.currency = currency;
         this.type = type;
+        this.currency = currency;
+        this.nick = nick;
+
     }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
 
     public UUID getUuid() {
         return uuid;
@@ -99,17 +128,4 @@ public class AccountEntity {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return "AccountEntity{" +
-                "uuid=" + uuid +
-                ", dtCreate=" + dtCreate +
-                ", dtUpdate=" + dtUpdate +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", balance=" + balance +
-                ", type='" + type + '\'' +
-                ", currency='" + currency + '\'' +
-                '}';
-    }
 }

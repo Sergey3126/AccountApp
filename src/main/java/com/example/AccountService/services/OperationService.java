@@ -5,15 +5,22 @@ import com.example.AccountService.dao.api.IOperationStorage;
 import com.example.AccountService.dao.entity.OperationEntity;
 
 import com.example.AccountService.models.Operation;
+import com.example.AccountService.models.User;
 import com.example.AccountService.services.api.IOperationService;
 import com.example.AccountService.services.api.MessageError;
 import com.example.AccountService.services.api.ValidationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 
 import java.nio.charset.StandardCharsets;
@@ -39,6 +46,8 @@ public class OperationService implements IOperationService {
     private final IOperationStorage operationStorage;
     private final ConversionService conversionService;
     private LocalDateTime localDateTime = LocalDateTime.now();
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private RestTemplate restTemplate = new RestTemplate();
 
     //ссылка для доступа к списку валют
     @Value("${classifier_currency_url}")
@@ -46,10 +55,13 @@ public class OperationService implements IOperationService {
     //ссылка для доступа к списку категорий
     @Value("${classifier_category_url}")
     private String categoryUrl;
+    //ссылка для доступа к шифровке
+    @Value("${encryption_url}")
+    private String encryptionUrl;
+
 
     public OperationService(AccountService accountService, IOperationStorage operationStorage, ConversionService conversionService) {
         this.accountService = accountService;
-
         this.operationStorage = operationStorage;
         this.conversionService = conversionService;
 
@@ -58,13 +70,20 @@ public class OperationService implements IOperationService {
     @Override
     public Operation createOperation(UUID accountUuid, Operation operationRaw) {
 
+        User user = new User();
+        user.setKey(operationRaw.getKey());
+        user.setNick(operationRaw.getNick());
+        checkKey(user);
+
         check(operationRaw, accountUuid);
+
         try {
             //создает DtCreate, DtUpdate, Uuid, AccountUuid и обновляет баланс счета
             operationRaw.setUuid(UUID.randomUUID());
             operationRaw.setAccountUuid(accountUuid);
             operationRaw.setDtCreate(localDateTime);
             operationRaw.setDtUpdate(localDateTime);
+
             accountService.updateBalance(operationRaw.getValue(), operationRaw.getAccountUuid());
             operationStorage.save(conversionService.convert(operationRaw, OperationEntity.class));
         } catch (DataIntegrityViolationException e) {
@@ -77,7 +96,8 @@ public class OperationService implements IOperationService {
     }
 
     @Override
-    public PageImpl<Operation> getOperation(UUID accountUuid, int page, int size) {
+    public PageImpl<Operation> getOperation(UUID accountUuid, int page, int size, User user) {
+        checkKey(user);
         // Проверка на положительность значений(что больше 0 и не равен 0)
         if (page <= 0) {
             throw new ValidationException(MessageError.PAGE_NUMBER);
@@ -90,7 +110,13 @@ public class OperationService implements IOperationService {
         int end;
         Pageable pageable;
         try {
-            List<OperationEntity> operationEntityList = operationStorage.findByAccountUuid(accountUuid);
+            //Получаем доступные операции и удаляем лишнее
+            List<OperationEntity> operationEntityList = operationStorage.findByNick(user.getNick());
+            for (int e = operationEntityList.size() - 1; e >= 0; e--) {
+                if (operationEntityList.get(e).getAccountUuid() != accountUuid) {
+                    operationEntityList.remove(e);
+                }
+            }
             operationList = new ArrayList<>();
             pageable = Pageable.ofSize(size).withPage(page - 1);
             // Конвертация OperationEntity в Operation и добавление в список
@@ -119,10 +145,23 @@ public class OperationService implements IOperationService {
 
     @Override
     public OperationEntity updateOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, Operation operationRaw) {
-        OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
 
+        User user = new User();
+        user.setKey(operationRaw.getKey());
+        user.setNick(operationRaw.getNick());
+        checkKey(user);
 
         check(operationRaw, accountUuid);
+
+        OperationEntity operationEntity = new OperationEntity();
+        //Получаем доступные операции и ищем нужную
+        List<OperationEntity> operationEntityList = operationStorage.findByNick(operationRaw.getNick());
+        for (int i = 0; i < operationEntityList.size(); i++) {
+            operationEntity = operationEntityList.get(i);
+            if (operationEntity.getUuid() == uuidOperation) {
+                break;
+            }
+        }
         checkData(operationEntity, dtUpdate, accountUuid);
 
         try {
@@ -146,9 +185,20 @@ public class OperationService implements IOperationService {
         return operationEntity;
     }
 
-    public OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate) {
-        OperationEntity operationEntity = operationStorage.findById(uuidOperation).orElse(null);
+    @Override
+    public OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, User user) {
 
+
+        checkKey(user);
+        OperationEntity operationEntity = new OperationEntity();
+        //Получаем доступные операции и ищем нужную
+        List<OperationEntity> operationEntityList = operationStorage.findByNick(user.getNick());
+        for (int i = 0; i < operationEntityList.size(); i++) {
+            operationEntity = operationEntityList.get(i);
+            if (operationEntity.getUuid() == uuidOperation) {
+                break;
+            }
+        }
         checkData(operationEntity, dtUpdate, accountUuid);
         try {
 //Обновляет баланс и удаляет операцию
@@ -164,14 +214,23 @@ public class OperationService implements IOperationService {
     }
 
     @Override
-    public List<Operation> getOperationList(UUID accountUuid) {
+    public List<Operation> getOperationList(UUID accountUuid, User user) {
         int start;
-        List<Operation> operationList;
+        List<Operation> operationList = new ArrayList<>();
         int end;
         Pageable pageable;
+
+        checkKey(user);
+
         try {
-            List<OperationEntity> operationEntityList = operationStorage.findByAccountUuid(accountUuid);
-            operationList = new ArrayList<>();
+            //Получаем доступные операции и удаляем лишнее
+            List<OperationEntity> operationEntityList = operationStorage.findByNick(user.getNick());
+            for (int e = operationEntityList.size() - 1; e >= 0; e--) {
+                if (operationEntityList.get(e).getAccountUuid() != accountUuid) {
+                    operationEntityList.remove(e);
+                }
+            }
+
             // Конвертация OperationEntity в Operation и добавление в список
             for (int i = 0; i < operationEntityList.size(); i++) {
                 OperationEntity operationEntity = operationEntityList.get(i);
@@ -208,6 +267,9 @@ public class OperationService implements IOperationService {
         if ((operationRaw.getDescription() == null) || (operationRaw.getCurrency() == null) || (operationRaw.getDate() == null) || (operationRaw.getCategory() == null) || (operationRaw.getValue() == 0)) {
             throw new ValidationException(MessageError.EMPTY_LINE);
         }
+        User user = new User();
+        user.setKey(operationRaw.getKey());
+        user.setNick(operationRaw.getNick());
         //Проверяет, совпадают ли типы валют
         if (!accountService.checkAccount(accountUuid, operationRaw.getCurrency())) {
             throw new ValidationException(MessageError.INCORRECT_CURRENCY);
@@ -231,5 +293,27 @@ public class OperationService implements IOperationService {
         }
     }
 
+    //проверка авторизации
+    private void checkKey(User user) {
+        // Проверяем, что обязательные поля не пусты
+        if (user.getNick() == null || user.getKey() == null) {
+            throw new ValidationException(MessageError.EMPTY_LINE);
+        }
+        try {
+            //получаем совпадает ли токен
+            String jsonUser = objectMapper.writeValueAsString(user);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> str = new HttpEntity<>(jsonUser, headers);
+            ResponseEntity<Boolean> response = restTemplate.postForEntity(encryptionUrl + "check", str, boolean.class);
+            boolean bool = response.getBody();
+
+            if (!bool) {
+                throw new ValidationException(MessageError.INCORRECT_TOKEN);
+            }
+        } catch (IOException e) {
+            throw new ValidationException(MessageError.INCORRECT_UUID);
+        }
+    }
 }
 

@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface IOperationStorage extends JpaRepository<OperationEntity, UUID> {
     List<OperationEntity> findByAccountUuid(UUID accountUuid);
 
+    List<OperationEntity> findByNick(String nick);
 }

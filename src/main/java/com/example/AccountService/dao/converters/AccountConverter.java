@@ -20,6 +20,8 @@ public class AccountConverter implements Converter<AccountEntity, Account> {
         account.setBalance(source.getBalance());
         account.setType(TypeOfAccount.valueOf(source.getType()));
         account.setCurrency(source.getCurrency());
+        account.setNick(source.getNick());
+
         return account;
     }
 

@@ -23,7 +23,7 @@ public class OperationConverterEntity implements Converter<Operation, OperationE
         operationEntity.setAccountUuid(source.getAccountUuid());
         operationEntity.setValue(source.getValue());
         operationEntity.setCurrency(source.getCurrency());
-
+        operationEntity.setNick(source.getNick());
         return operationEntity;
     }
 

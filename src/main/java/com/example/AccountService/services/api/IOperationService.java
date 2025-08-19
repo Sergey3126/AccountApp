@@ -2,6 +2,7 @@ package com.example.AccountService.services.api;
 
 import com.example.AccountService.dao.entity.OperationEntity;
 import com.example.AccountService.models.Operation;
+import com.example.AccountService.models.User;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
@@ -24,9 +25,10 @@ public interface IOperationService {
      * @param accountUuid Ключ счета
      * @param page        номер страницы(больше 0)
      * @param size        кол-во объектов на странице(размер страницы, больше 0)
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @return список операций
      */
-    PageImpl<Operation> getOperation(UUID accountUuid, int page, int size);
+    PageImpl<Operation> getOperation(UUID accountUuid, int page, int size, User user);
 
     /**
      * Изменяет операцию
@@ -34,7 +36,7 @@ public interface IOperationService {
      * @param accountUuid   Ключ счета
      * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
-     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат)
+     * @param operationRaw  тело операции с date(дата операции), description(описание), value(значение изменения счета), currency(валюта), category(категория трат), nick(ник), key(токен)
      * @return обновленную операцию
      */
     OperationEntity updateOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, Operation operationRaw);
@@ -45,15 +47,17 @@ public interface IOperationService {
      * @param accountUuid   Ключ счета
      * @param uuidOperation Ключ операции
      * @param dtUpdate      дата обновления
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @return информацию об удаленной операции
      */
-    OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate);
+    OperationEntity deleteOperation(UUID accountUuid, UUID uuidOperation, LocalDateTime dtUpdate, User user);
 
     /**
      * Дает список операций счета
-     *
+     * @param user тело авторизации с nick(ник) и key(токен)
      * @param accountUuid Ключ счета
      * @return список операций
      */
-    List<Operation> getOperationList(UUID accountUuid);
+
+    List<Operation> getOperationList(UUID accountUuid, User user);
 }
