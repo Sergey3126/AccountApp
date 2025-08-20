@@ -73,7 +73,6 @@ public class AccountService implements IAccountService {
         user.setKey(accountRaw.getKey());
         user.setNick(accountRaw.getNick());
         checkKey(user);
-        accountRaw.setKey(null);
         try {
             //создает DtCreate, DtUpdate, Uuid
             accountRaw.setDtCreate(localDateTime);

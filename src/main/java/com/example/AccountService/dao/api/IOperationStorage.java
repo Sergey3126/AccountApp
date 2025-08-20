@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface IOperationStorage extends JpaRepository<OperationEntity, UUID> {
-    List<OperationEntity> findByAccountUuid(UUID accountUuid);
+
 
     List<OperationEntity> findByNick(String nick);
 }
