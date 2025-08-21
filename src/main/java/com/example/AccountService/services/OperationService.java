@@ -214,17 +214,20 @@ public class OperationService implements IOperationService {
     }
 
     @Override
-    public List<Operation> getOperationList(UUID accountUuid, User user) {
+    public List<Operation> getOperationList(UUID accountUuid, String nick, String key) {
         int start;
         List<Operation> operationList = new ArrayList<>();
         int end;
         Pageable pageable;
 
+        User user = new User();
+        user.setNick(nick);
+        user.setKey(key);
         checkKey(user);
 
         try {
             //Получаем доступные операции и удаляем лишнее
-            List<OperationEntity> operationEntityList = operationStorage.findByNick(user.getNick());
+            List<OperationEntity> operationEntityList = operationStorage.findByNick(nick);
             for (int e = operationEntityList.size() - 1; e >= 0; e--) {
                 if (operationEntityList.get(e).getAccountUuid() != accountUuid) {
                     operationEntityList.remove(e);

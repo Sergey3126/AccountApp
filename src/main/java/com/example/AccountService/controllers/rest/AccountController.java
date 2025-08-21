@@ -47,21 +47,22 @@ public class AccountController {
     @GetMapping(value = {"{page}/{size}", "{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public PageImpl<Account> getAccounts(@PathVariable int page, @PathVariable int size,@RequestBody User user) {
-        return accountService.getAccounts(page, size,user);
+    public PageImpl<Account> getAccounts(@PathVariable int page, @PathVariable int size, @RequestBody User user) {
+        return accountService.getAccounts(page, size, user);
     }
 
     /**
      * Дает счет по ключу
-     * @param user тело авторизации с nick(ник) и key(токен)
      * @param uuid Ключ счета
+     * @param nick Имя пользователя
+     *  @param key Ключ пользователя
      * @return полученный счет
      */
-    @GetMapping(value = {"{uuid}", "{uuid}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"{uuid}/{nick}/{key}", "{uuid}/{nick}/{key}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public Account getAccount(@PathVariable UUID uuid,@RequestBody User user) {
-        return accountService.getAccount(uuid,user);
+    public Account getAccount(@PathVariable UUID uuid, @PathVariable String nick, @PathVariable String key) {
+        return accountService.getAccount(uuid, nick, key);
     }
 
     /**

@@ -54,10 +54,11 @@ public interface IOperationService {
 
     /**
      * Дает список операций счета
-     * @param user тело авторизации с nick(ник) и key(токен)
+     * @param nick Имя пользователя
+     *  @param key Ключ пользователя
      * @param accountUuid Ключ счета
      * @return список операций
      */
 
-    List<Operation> getOperationList(UUID accountUuid, User user);
+    List<Operation> getOperationList(UUID accountUuid, String nick, String key);
 }

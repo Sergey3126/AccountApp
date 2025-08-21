@@ -131,18 +131,22 @@ public class AccountService implements IAccountService {
 
 
     @Override
-    public Account getAccount(UUID uuid, User user) {
+    public Account getAccount(UUID uuid, String nick, String key) {
         Account account;
         AccountEntity accountEntity = new AccountEntity();
+        User user = new User();
+        user.setNick(nick);
+        user.setKey(key);
         checkKey(user);
         try {
-            List<AccountEntity> accountEntityList = accountStorage.findByNick(user.getNick());
+            List<AccountEntity> accountEntityList = accountStorage.findByNick(nick);
             for (int i = 0; i < accountEntityList.size(); i++) {
                 accountEntity = accountEntityList.get(i);
                 if (accountEntity.getUuid() == uuid) {
                     break;
                 }
             }
+            accountEntity = accountStorage.findById(uuid).orElse(null);
             account = conversionService.convert(accountEntity, Account.class);
 
         } catch (DataIntegrityViolationException e) {

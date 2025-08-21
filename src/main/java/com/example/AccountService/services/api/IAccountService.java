@@ -28,11 +28,13 @@ public interface IAccountService {
 
     /**
      * Дает счет по ключу
-     * @param user тело авторизации с nick(ник) и key(токен)
+     * @param nick Имя пользователя
+     *  @param key Ключ пользователя
      * @param uuid Ключ счета
      * @return полученный счет
      */
-    Account getAccount(UUID uuid, User user);
+
+    Account getAccount(UUID uuid, String nick, String key);
 
     /**
      * Обновляет информацию об счете

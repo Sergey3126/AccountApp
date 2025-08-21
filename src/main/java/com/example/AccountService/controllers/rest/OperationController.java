@@ -54,8 +54,8 @@ public class OperationController {
     @GetMapping(value = {"{account_uuid}/operation/{page}/{size}", "{account_uuid}/operation/{page}/{size}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public PageImpl<Operation> getOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable int page, @PathVariable int size,@RequestBody User user) {
-        return operationService.getOperation(accountUuid, page, size,user);
+    public PageImpl<Operation> getOperation(@PathVariable("account_uuid") UUID accountUuid, @PathVariable int page, @PathVariable int size, @RequestBody User user) {
+        return operationService.getOperation(accountUuid, page, size, user);
     }
 
     /**
@@ -87,21 +87,22 @@ public class OperationController {
     @DeleteMapping(value = {"{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}", "{account_uuid}/operation/{uuid_operation}/dt_update/{dt_update}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public OperationEntity deleteOperation(@RequestBody User user,@PathVariable("account_uuid") UUID accountUuid, @PathVariable("uuid_operation") UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
-        return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate,user);
+    public OperationEntity deleteOperation(@RequestBody User user, @PathVariable("account_uuid") UUID accountUuid, @PathVariable("uuid_operation") UUID uuidOperation, @PathVariable("dt_update") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dtUpdate) {
+        return operationService.deleteOperation(accountUuid, uuidOperation, dtUpdate, user);
     }
 
     /**
      * Дает список операций счета
-     * @param user тело авторизации с nick(ник) и key(токен)
+     * @param nick Имя пользователя
+     *  @param key Ключ пользователя
      * @param accountUuid Ключ счета
      * @return список операций
      */
-    @GetMapping(value = {"{account_uuid}/operation", "{account_uuid}/operation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"{account_uuid}/operation/{nick}/{key}", "{account_uuid}/operation/{nick}/{key}/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public List<Operation> getOperationList(@RequestBody User user,@PathVariable("account_uuid") UUID accountUuid) {
-        return operationService.getOperationList(accountUuid,user);
+    public List<Operation> getOperationList(@PathVariable("account_uuid") UUID accountUuid, @PathVariable String nick, @PathVariable String key) {
+        return operationService.getOperationList(accountUuid, nick, key);
     }
 }
 
