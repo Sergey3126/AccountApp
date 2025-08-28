@@ -37,8 +37,8 @@ public class UserService implements IUserService {
         if (userStorage.existsByNick(user.getNick())) {
             throw new ValidationException(MessageError.NICK_TAKEN);
         }
-        if (!user.getPassword().matches("^[a-zA-Z]+$")) {
-            throw new ValidationException(MessageError.PASSWORD_ERROR);
+        if (!user.getNick().matches("^[a-zA-Z]+$")) {
+            throw new ValidationException(MessageError.NICK_ERROR);
         }
         check(user);
         try {

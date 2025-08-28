@@ -9,7 +9,7 @@ public final class MessageError {
 
     public static final String SERVER_ERROR = "Сервер не смог корректно обработать запрос. Пожалуйста обратитесь к администратору ";
 
-    public static final String PASSWORD_ERROR = "Пароль содержит не доступные символы";
+    public static final String NICK_ERROR = "Nick содержит не доступные символы(только латиница)";
 
     public static final String EMPTY_LINE = "Пустая строка";
 
