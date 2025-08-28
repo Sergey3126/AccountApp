@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/classifier_app?ApplicationName=TestSweetApp
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: 20 # Увеличить при необходимости
+      leak-detection-threshold: 60000  # Включить детектор утечек
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 8081
